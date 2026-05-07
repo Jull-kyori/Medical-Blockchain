@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Medical Chain — Blockchain Hospital</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav>
+  <span class="brand">🏥 Medical Chain</span>
+  <a href="/">⛓️ Blockchain</a>
+  <a href="/wallet">💰 Wallet & MED Coin</a>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <h1>⛓️ Blockchain Rekam Medis</h1>
+    <p>Sistem penyimpanan data medis berbasis blockchain — Dataset: Heart Disease UCI</p>
+    <span class="badge badge-blue" id="chainStatus">Memuat...</span>
+    <span class="badge badge-blue" id="chainLength">0 Blocks</span>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats">
+    <div class="stat-card">
+      <div class="stat-val" id="statBlocks">0</div>
+      <div class="stat-label">Total Blocks</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="statPatients">0</div>
+      <div class="stat-label">Data Pasien</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-val" id="statValid">-</div>
+      <div class="stat-label">Status Chain</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Panel Kiri: Form + Load Dataset -->
+    <div>
+      <!-- Load Dataset Button -->
+      <div class="card" style="margin-bottom: 20px;">
+        <h2>📂 Load Dataset UCI</h2>
+        <p style="font-size:0.82rem;color:#64748b;margin-bottom:12px;">
+          Masukkan 20 record pertama dari Heart Disease UCI ke blockchain sekaligus.
+        </p>
+        <div id="loadAlert" class="alert"></div>
+        <button class="btn btn-outline" onclick="loadDataset()" id="btnLoad">
+          📥 Load Heart Disease Dataset
+        </button>
+      </div>
+
+      <!-- Form Tambah Manual -->
+      <div class="card">
+        <h2>➕ Tambah Record Manual</h2>
+        <div id="addAlert" class="alert"></div>
+
+        <div class="form-group">
+          <label>Patient ID</label>
+          <input type="text" id="patientId" placeholder="Contoh: UCI-0001">
+        </div>
+        <div class="form-group">
+          <label>Umur</label>
+          <input type="number" id="age" placeholder="45">
+        </div>
+        <div class="form-group">
+          <label>Jenis Kelamin</label>
+          <select id="sex">
+            <option value="Male">Male</option>
+            <option value="Female">Female</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Diagnosis</label>
+          <select id="diagnosis">
+            <option value="Normal">Normal (Sehat)</option>
+            <option value="Heart Disease">Heart Disease</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Kolesterol</label>
+          <input type="text" id="chol" placeholder="200">
+        </div>
+        <div class="form-group">
+          <label>Tekanan Darah</label>
+          <input type="text" id="bp" placeholder="120">
+        </div>
+        <div class="form-group">
+          <label>Dokter</label>
+          <input type="text" id="doctor" placeholder="Dr. Ahmad">
+        </div>
+        <div class="form-group">
+          <label>Tanggal</label>
+          <input type="date" id="date">
+        </div>
+
+        <button class="btn btn-primary" onclick="addRecord()" id="btnAdd">
+          ⛏️ Mine & Tambah Block
+        </button>
+      </div>
+    </div>
+
+    <!-- Panel Kanan: Tampilan Blockchain -->
+    <div>
+      <div class="card">
+        <h2>⛓️ Blockchain</h2>
+        <div id="chainContainer">
+          <div class="loading"><span class="spinner"></span>Memuat blockchain...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="/js/blockchain.js"></script>
+</body>
+</html>

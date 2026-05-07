@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedChain — Wallet MED Coin</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<nav>
+  <span class="brand">🏥 MedChain</span>
+  <a href="/">⛓️ Blockchain</a>
+  <a href="/wallet">💰 Wallet & MED Coin</a>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <h1>💰 MED Coin Wallet</h1>
+    <p>Sistem pembayaran berbasis Coinbase — Koin: <b>MED</b></p>
+    <span class="badge badge-green">💎 1 MED = Biaya Layanan Medis</span>
+  </div>
+
+  <!-- Daftar Wallet -->
+  <div class="card" style="margin-bottom:24px;">
+    <h2>👛 Daftar Wallet</h2>
+    <button class="btn btn-outline" style="width:auto;padding:8px 20px;margin-bottom:14px;" onclick="openCreateModal()">
+      + Buat Wallet Baru
+    </button>
+    <div id="walletList" class="wallet-grid">
+      <div class="loading"><span class="spinner"></span>Memuat wallet...</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- Form Transfer -->
+    <div class="card">
+      <h2>💸 Transfer MED Coin</h2>
+      <div id="sendAlert" class="alert"></div>
+      <div class="form-group">
+        <label>Dari Wallet</label>
+        <select id="fromWallet"></select>
+      </div>
+      <div class="form-group">
+        <label>Ke Wallet</label>
+        <select id="toWallet"></select>
+      </div>
+      <div class="form-group">
+        <label>Jumlah MED</label>
+        <input type="number" id="amount" placeholder="10" min="1">
+      </div>
+      <div id="sendAlert" class="alert"></div>
+      <button class="btn btn-primary" onclick="sendMED()">💸 Kirim MED Coin</button>
+    </div>
+
+    <!-- Riwayat Transaksi -->
+    <div class="card">
+      <h2>📜 Riwayat Transaksi</h2>
+      <div id="txList">
+        <p style="color:#94a3b8;font-size:0.85rem;">Belum ada transaksi</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Buat Wallet -->
+<div id="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:28px;width:360px;max-width:90%;">
+    <h2 style="margin-bottom:16px;color:#1e3a8a;">👛 Buat Wallet Baru</h2>
+    <div class="form-group">
+      <label>Label Wallet</label>
+      <input type="text" id="walletLabel" placeholder="Contoh: Pasien Ahmad">
+    </div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-primary" style="width:auto;flex:1;" onclick="createWallet()">Buat Wallet</button>
+      <button class="btn btn-outline" style="width:auto;flex:1;" onclick="closeModal()">Batal</button>
+    </div>
+    <div id="newWalletInfo" style="display:none;margin-top:14px;background:#f0fdf4;border-radius:8px;padding:12px;font-size:0.8rem;">
+    </div>
+  </div>
+</div>
+
+<script src="/js/wallet.js"></script>
+</body>
+</html>
