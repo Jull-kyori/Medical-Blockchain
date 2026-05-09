@@ -3,15 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Medical Chain — Blockchain Hospital</title>
+  <title>MedChain — Blockchain Hospital</title>
   <link rel="stylesheet" href="/css/style.css">
 </head>
 <body>
+
 <nav>
   <span class="brand">🏥 Medical Chain</span>
   <a href="/">⛓️ Blockchain</a>
   <a href="/wallet">💰 Wallet & MED Coin</a>
+  <a href="/contract">📜 Smart Contract</a>  <!-- ← TAMBAHAN BARU -->
 </nav>
+
 <div class="container">
   <div class="header">
     <h1>⛓️ Blockchain Rekam Medis</h1>
@@ -78,6 +81,18 @@
             <option value="Heart Disease">Heart Disease</option>
           </select>
         </div>
+
+        <!-- ← TAMBAHAN BARU: Level diagnosis muncul kalau Heart Disease -->
+        <div class="form-group" id="levelGroup" style="display:none;">
+          <label>Level Keparahan</label>
+          <select id="diagnosisLevel">
+            <option value="1">1 – Ringan</option>
+            <option value="2">2 – Sedang</option>
+            <option value="3">3 – Berat</option>
+            <option value="4">4 – Sangat Berat</option>
+          </select>
+        </div>
+
         <div class="form-group">
           <label>Kolesterol</label>
           <input type="text" id="chol" placeholder="200">
@@ -99,6 +114,18 @@
           ⛏️ Mine & Tambah Block
         </button>
       </div>
+
+      <!-- ← TAMBAHAN BARU: Shortcut ke Smart Contract -->
+      <div class="card" style="margin-top:20px;background:linear-gradient(135deg,#1e3a8a,#3b82f6);color:white;">
+        <h2 style="color:white;">📜 Smart Contract</h2>
+        <p style="font-size:0.82rem;opacity:0.85;margin-bottom:14px;">
+          Gunakan smart contract untuk klaim asuransi otomatis, kelola akses rekam medis, dan proses pembayaran MED Coin.
+        </p>
+        <a href="/contract" style="display:block;text-align:center;background:white;color:#1e3a8a;
+          padding:10px;border-radius:10px;font-weight:700;text-decoration:none;">
+          ⚡ Buka Smart Contract →
+        </a>
+      </div>
     </div>
 
     <!-- Panel Kanan: Tampilan Blockchain -->
@@ -109,6 +136,37 @@
           <div class="loading"><span class="spinner"></span>Memuat blockchain...</div>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- ← TAMBAHAN BARU: Modal klaim asuransi dari block -->
+<div id="claimModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.5);
+  z-index:100;align-items:center;justify-content:center;">
+  <div style="background:white;border-radius:16px;padding:28px;width:400px;max-width:90%;">
+    <h2 style="margin-bottom:6px;color:#1e3a8a;">🏥 Klaim Asuransi Otomatis</h2>
+    <p style="font-size:0.82rem;color:#64748b;margin-bottom:16px;">
+      Smart contract akan otomatis menghitung dan mencairkan klaim.
+    </p>
+    <div id="claimPatientInfo" style="background:#f0f4ff;border-radius:10px;padding:12px;
+      margin-bottom:14px;font-size:0.85rem;"></div>
+    <div class="form-group">
+      <label>Pilih Insurance Contract</label>
+      <select id="claimContractId"><option value="">-- Pilih Contract --</option></select>
+    </div>
+    <div class="form-group">
+      <label>Wallet Pasien (penerima klaim)</label>
+      <input type="text" id="claimWallet" placeholder="0x...">
+    </div>
+    <div id="claimResult" style="display:none;padding:12px;border-radius:8px;
+      margin-bottom:12px;font-size:0.83rem;"></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-green" style="flex:1;" onclick="submitClaim()">
+        ⚡ Eksekusi Klaim
+      </button>
+      <button class="btn btn-outline" style="flex:1;" onclick="closeClaimModal()">
+        Batal
+      </button>
     </div>
   </div>
 </div>

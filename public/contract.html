@@ -1,0 +1,584 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MedChain — Smart Contract</title>
+  <link rel="stylesheet" href="/css/style.css">
+  <style>
+    .contract-tabs { display:flex; gap:8px; margin-bottom:20px; flex-wrap:wrap; }
+    .tab-btn {
+      padding:9px 20px; border-radius:10px; border:2px solid #3b82f6;
+      background:white; color:#2563eb; font-weight:700; cursor:pointer; font-size:0.88rem;
+      transition:all 0.2s;
+    }
+    .tab-btn.active { background:#2563eb; color:white; }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    .contract-card {
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
+      color:white; border-radius:16px; padding:20px; margin-bottom:14px;
+    }
+    .contract-card .type { font-size:0.75rem; opacity:0.8; margin-bottom:4px; }
+    .contract-card .name { font-size:1.1rem; font-weight:800; margin-bottom:6px; }
+    .contract-card .address { font-family:monospace; font-size:0.7rem; opacity:0.75; word-break:break-all; }
+    .contract-card .stats { display:flex; gap:16px; margin-top:12px; flex-wrap:wrap; }
+    .contract-card .stat { background:rgba(255,255,255,0.15); border-radius:8px; padding:6px 12px; font-size:0.8rem; }
+    .contract-card .stat b { display:block; font-size:1.2rem; }
+
+    .log-item {
+      border-left: 4px solid #3b82f6; padding: 10px 14px;
+      background:white; border-radius:0 8px 8px 0; margin-bottom:8px; font-size:0.82rem;
+    }
+    .log-item.DEPLOY  { border-color:#f59e0b; }
+    .log-item.EXECUTE { border-color:#10b981; }
+    .log-item.GRANT   { border-color:#8b5cf6; }
+    .log-item.REVOKE  { border-color:#ef4444; }
+    .log-item.SKIP    { border-color:#94a3b8; }
+    .log-action { font-weight:800; font-size:0.75rem; letter-spacing:0.05em; }
+    .log-desc { color:#374151; margin-top:2px; }
+    .log-time { color:#94a3b8; font-size:0.7rem; margin-top:2px; }
+
+    .tariff-table { width:100%; border-collapse:collapse; font-size:0.85rem; }
+    .tariff-table th { background:#1e3a8a; color:white; padding:8px 12px; text-align:left; }
+    .tariff-table td { padding:8px 12px; border-bottom:1px solid #e2e8f0; }
+    .tariff-table tr:hover td { background:#f0f4ff; }
+
+    .result-box {
+      display:none; margin-top:14px; padding:14px; border-radius:10px;
+      font-size:0.85rem; line-height:1.6;
+    }
+    .result-box.success { background:#dcfce7; border:1px solid #86efac; color:#166534; }
+    .result-box.error   { background:#fee2e2; border:1px solid #fca5a5; color:#991b1b; }
+
+    .access-badge {
+      display:inline-block; padding:2px 10px; border-radius:999px;
+      font-size:0.75rem; font-weight:700;
+    }
+    .access-yes { background:#dcfce7; color:#166534; }
+    .access-no  { background:#fee2e2; color:#991b1b; }
+  </style>
+</head>
+<body>
+
+<nav>
+  <span class="brand">🏥 Medical Chain</span>
+  <a href="/">⛓️ Blockchain</a>
+  <a href="/wallet">💰 Wallet & MED Coin</a>
+  <a href="/contract">📜 Smart Contract</a>
+</nav>
+
+<div class="container">
+  <div class="header">
+    <h1>📜 Smart Contract</h1>
+    <p>Deploy dan eksekusi smart contract otomatis di MedChain</p>
+    <span class="badge badge-blue">⚡ Auto-Execute · Trustless · Transparent</span>
+  </div>
+
+  <!-- TABS -->
+  <div class="contract-tabs">
+    <button class="tab-btn active" onclick="switchTab('deployed')">🗂️ Deployed Contracts</button>
+    <button class="tab-btn" onclick="switchTab('insurance')">🏥 Insurance Contract</button>
+    <button class="tab-btn" onclick="switchTab('access')">🔐 Access Control</button>
+    <button class="tab-btn" onclick="switchTab('payment')">💳 Payment Contract</button>
+    <button class="tab-btn" onclick="switchTab('logs')">📋 Execution Logs</button>
+  </div>
+
+  <!-- TAB: DEPLOYED CONTRACTS -->
+  <div class="tab-panel active" id="tab-deployed">
+    <div class="card">
+      <h2>🗂️ Semua Contract yang Di-Deploy</h2>
+      <div id="contractList">
+        <div class="loading"><span class="spinner"></span>Memuat contracts...</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: INSURANCE -->
+  <div class="tab-panel" id="tab-insurance">
+    <div class="grid-2">
+      <!-- Deploy -->
+      <div class="card">
+        <h2>🚀 Deploy Insurance Contract</h2>
+        <p style="font-size:0.82rem;color:#64748b;margin-bottom:14px;">
+          Contract ini otomatis mencairkan asuransi saat pasien terdiagnosis Heart Disease.
+        </p>
+        <div class="form-group">
+          <label>Owner Address (Hospital Wallet)</label>
+          <input type="text" id="ins_owner" placeholder="0xHOSPITAL...">
+        </div>
+        <div class="form-group">
+          <label>Dana Asuransi (MED)</label>
+          <input type="number" id="ins_fund" placeholder="5000" value="5000">
+        </div>
+        <button class="btn btn-primary" onclick="deployInsurance()">🚀 Deploy Contract</button>
+        <div id="ins_deploy_result" class="result-box"></div>
+      </div>
+
+      <!-- Klaim -->
+      <div class="card">
+        <h2>💰 Ajukan Klaim Asuransi</h2>
+        <p style="font-size:0.82rem;color:#64748b;margin-bottom:14px;">
+          Contract otomatis menghitung & mencairkan klaim sesuai level diagnosis.
+        </p>
+
+        <!-- Tabel tarif -->
+        <table class="tariff-table" style="margin-bottom:14px;">
+          <tr><th>Diagnosis</th><th>Level</th><th>Klaim (MED)</th></tr>
+          <tr><td>Normal</td><td>-</td><td>0</td></tr>
+          <tr><td>Heart Disease</td><td>1 (Ringan)</td><td>50</td></tr>
+          <tr><td>Heart Disease</td><td>2 (Sedang)</td><td>100</td></tr>
+          <tr><td>Heart Disease</td><td>3 (Berat)</td><td>200</td></tr>
+          <tr><td>Heart Disease</td><td>4 (Sangat Berat)</td><td>300</td></tr>
+        </table>
+
+        <div class="form-group">
+          <label>Contract ID</label>
+          <select id="ins_contract_id"><option value="">-- Pilih Contract --</option></select>
+        </div>
+        <div class="form-group">
+          <label>Patient ID</label>
+          <input type="text" id="ins_patient" placeholder="UCI-0001">
+        </div>
+        <div class="form-group">
+          <label>Diagnosis</label>
+          <select id="ins_diagnosis">
+            <option value="Normal">Normal</option>
+            <option value="Heart Disease">Heart Disease</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Level Keparahan (1–4)</label>
+          <select id="ins_level">
+            <option value="1">1 – Ringan</option>
+            <option value="2">2 – Sedang</option>
+            <option value="3">3 – Berat</option>
+            <option value="4">4 – Sangat Berat</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Wallet Pasien</label>
+          <input type="text" id="ins_wallet" placeholder="0x...">
+        </div>
+        <button class="btn btn-green" onclick="claimInsurance()">⚡ Eksekusi Klaim Otomatis</button>
+        <div id="ins_claim_result" class="result-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: ACCESS CONTROL -->
+  <div class="tab-panel" id="tab-access">
+    <div class="grid-2">
+      <!-- Deploy -->
+      <div class="card">
+        <h2>🚀 Deploy Access Control</h2>
+        <p style="font-size:0.82rem;color:#64748b;margin-bottom:14px;">
+          Contract ini mengatur siapa saja yang boleh melihat rekam medis pasien tertentu.
+        </p>
+        <div class="form-group">
+          <label>Owner Address</label>
+          <input type="text" id="ac_owner" placeholder="0xHOSPITAL...">
+        </div>
+        <button class="btn btn-primary" onclick="deployAccess()">🚀 Deploy Contract</button>
+        <div id="ac_deploy_result" class="result-box"></div>
+      </div>
+
+      <!-- Grant/Revoke/Check -->
+      <div class="card">
+        <h2>🔐 Kelola Akses Rekam Medis</h2>
+        <div class="form-group">
+          <label>Contract ID</label>
+          <select id="ac_contract_id"><option value="">-- Pilih Contract --</option></select>
+        </div>
+        <div class="form-group">
+          <label>Patient ID</label>
+          <input type="text" id="ac_patient" placeholder="UCI-0001">
+        </div>
+        <div class="form-group">
+          <label>Doctor Address</label>
+          <input type="text" id="ac_doctor" placeholder="0xDOCTOR...">
+        </div>
+        <div class="form-group">
+          <label>Authorized By (Admin)</label>
+          <input type="text" id="ac_by" placeholder="0xHOSPITAL...">
+        </div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-primary" style="flex:1;min-width:120px;" onclick="grantAccess()">✅ Grant Access</button>
+          <button class="btn" style="flex:1;min-width:120px;background:#ef4444;color:white;" onclick="revokeAccess()">❌ Revoke Access</button>
+          <button class="btn btn-outline" style="flex:1;min-width:120px;" onclick="checkAccess()">🔍 Check Access</button>
+        </div>
+        <div id="ac_result" class="result-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: PAYMENT -->
+  <div class="tab-panel" id="tab-payment">
+    <div class="grid-2">
+      <!-- Deploy -->
+      <div class="card">
+        <h2>🚀 Deploy Payment Contract</h2>
+        <p style="font-size:0.82rem;color:#64748b;margin-bottom:14px;">
+          Contract ini memproses pembayaran layanan medis secara otomatis menggunakan MED Coin.
+        </p>
+        <div class="form-group">
+          <label>Owner Address (Hospital)</label>
+          <input type="text" id="pay_owner" placeholder="0xHOSPITAL...">
+        </div>
+        <button class="btn btn-primary" onclick="deployPayment()">🚀 Deploy Contract</button>
+        <div id="pay_deploy_result" class="result-box"></div>
+
+        <!-- Tabel Tarif -->
+        <h2 style="margin-top:20px;">💰 Tarif Layanan Medis</h2>
+        <table class="tariff-table" style="margin-top:10px;">
+          <tr><th>Layanan</th><th>Tarif (MED)</th></tr>
+          <tr><td>Konsultasi Umum</td><td>10</td></tr>
+          <tr><td>Konsultasi Spesialis</td><td>25</td></tr>
+          <tr><td>Pemeriksaan Jantung</td><td>50</td></tr>
+          <tr><td>Lab Darah</td><td>15</td></tr>
+          <tr><td>Rawat Inap (per hari)</td><td>30</td></tr>
+          <tr><td>Operasi</td><td>200</td></tr>
+          <tr><td>Obat-obatan</td><td>20</td></tr>
+        </table>
+      </div>
+
+      <!-- Bayar -->
+      <div class="card">
+        <h2>💳 Proses Pembayaran</h2>
+        <div class="form-group">
+          <label>Contract ID</label>
+          <select id="pay_contract_id"><option value="">-- Pilih Contract --</option></select>
+        </div>
+        <div class="form-group">
+          <label>Dari Wallet (Pasien)</label>
+          <input type="text" id="pay_from" placeholder="0x...">
+        </div>
+        <div class="form-group">
+          <label>Jenis Layanan</label>
+          <select id="pay_service">
+            <option>Konsultasi Umum</option>
+            <option>Konsultasi Spesialis</option>
+            <option>Pemeriksaan Jantung</option>
+            <option>Lab Darah</option>
+            <option>Rawat Inap (per hari)</option>
+            <option>Operasi</option>
+            <option>Obat-obatan</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Jumlah / Kuantitas</label>
+          <input type="number" id="pay_qty" value="1" min="1">
+        </div>
+        <button class="btn btn-green" onclick="executePayment()">⚡ Proses Pembayaran</button>
+        <div id="pay_result" class="result-box"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: LOGS -->
+  <div class="tab-panel" id="tab-logs">
+    <div class="card">
+      <h2>📋 Execution Logs</h2>
+      <p style="font-size:0.82rem;color:#64748b;margin-bottom:14px;">
+        Semua aktivitas smart contract tercatat secara transparan dan tidak bisa diubah.
+      </p>
+      <button class="btn btn-outline" style="width:auto;padding:8px 20px;margin-bottom:16px;" onclick="fetchLogs()">
+        🔄 Refresh Logs
+      </button>
+      <div id="logList">
+        <div class="loading"><span class="spinner"></span>Memuat logs...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ─── TAB SWITCHER ────────────────────────────
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach((b, i) => {
+    b.classList.toggle('active', b.textContent.toLowerCase().includes(name) || 
+      ['deployed','insurance','access','payment','logs'][i] === name);
+  });
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+
+  if (name === 'deployed') fetchContracts();
+  if (name === 'logs') fetchLogs();
+  if (['insurance','access','payment'].includes(name)) fetchContracts();
+}
+
+// ─── FETCH CONTRACTS ─────────────────────────
+let allContracts = [];
+async function fetchContracts() {
+  const res  = await fetch('/api/contract');
+  const data = await res.json();
+  allContracts = data.contracts;
+  renderContractList(data.contracts);
+  updateContractSelects(data.contracts);
+}
+
+function renderContractList(contracts) {
+  const el = document.getElementById('contractList');
+  if (!contracts.length) {
+    el.innerHTML = '<p style="color:#94a3b8;">Belum ada contract. Deploy dulu di tab Insurance / Access / Payment.</p>';
+    return;
+  }
+  el.innerHTML = contracts.map(c => {
+    const stateEntries = Object.entries(c.state || {})
+      .filter(([k]) => !['accessList','payments'].includes(k))
+      .map(([k, v]) => `<div class="stat"><b>${typeof v === 'boolean' ? (v ? '✅' : '❌') : v}</b>${k}</div>`)
+      .join('');
+    return `
+      <div class="contract-card">
+        <div class="type">${c.type}</div>
+        <div class="name">${c.name}</div>
+        <div class="address">${c.id}</div>
+        <div class="stats">${stateEntries}</div>
+        <div style="font-size:0.7rem;opacity:0.6;margin-top:8px;">
+          Deployed: ${new Date(c.deployedAt).toLocaleString('id-ID')}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function updateContractSelects(contracts) {
+  const types = {
+    ins_contract_id:  'InsuranceContract',
+    ac_contract_id:   'AccessControl',
+    pay_contract_id:  'PaymentContract',
+  };
+  for (const [selId, type] of Object.entries(types)) {
+    const sel = document.getElementById(selId);
+    if (!sel) continue;
+    const filtered = contracts.filter(c => c.type === type);
+    sel.innerHTML = filtered.length
+      ? filtered.map(c => `<option value="${c.id}">${c.name} — ${c.id.substring(0,28)}...</option>`).join('')
+      : '<option value="">-- Belum ada contract --</option>';
+  }
+}
+
+// ─── FETCH LOGS ──────────────────────────────
+async function fetchLogs() {
+  const res  = await fetch('/api/contract/logs');
+  const data = await res.json();
+  const el   = document.getElementById('logList');
+  if (!data.logs.length) {
+    el.innerHTML = '<p style="color:#94a3b8;">Belum ada log eksekusi.</p>';
+    return;
+  }
+  el.innerHTML = [...data.logs].reverse().map(log => `
+    <div class="log-item ${log.action}">
+      <div class="log-action" style="color:${actionColor(log.action)}">⚡ ${log.action}</div>
+      <div class="log-desc">${log.description}</div>
+      <div class="log-time">
+        🕒 ${new Date(log.timestamp).toLocaleString('id-ID')} · 
+        Contract: ${log.contractId.substring(0, 30)}...
+      </div>
+    </div>
+  `).join('');
+}
+
+function actionColor(a) {
+  return {DEPLOY:'#f59e0b',EXECUTE:'#10b981',GRANT:'#8b5cf6',REVOKE:'#ef4444',SKIP:'#94a3b8'}[a] || '#64748b';
+}
+
+// ─── SHOW RESULT ─────────────────────────────
+function showResult(elId, type, html) {
+  const el = document.getElementById(elId);
+  el.className = `result-box ${type}`;
+  el.innerHTML = html;
+  el.style.display = 'block';
+}
+
+// ─────────────────────────────────────────────
+//  INSURANCE
+// ─────────────────────────────────────────────
+async function deployInsurance() {
+  const ownerAddress = document.getElementById('ins_owner').value.trim();
+  const fundAmount   = document.getElementById('ins_fund').value;
+  if (!ownerAddress) return showResult('ins_deploy_result', 'error', '❌ Owner address wajib diisi!');
+  try {
+    const res  = await fetch('/api/contract/insurance/deploy', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ ownerAddress, fundAmount: Number(fundAmount) }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showResult('ins_deploy_result', 'success',
+        `✅ Contract berhasil di-deploy!<br>
+         <b>ID:</b> <code>${data.contract.id}</code><br>
+         <b>Dana:</b> ${data.contract.state.fund} MED`);
+      fetchContracts();
+    } else {
+      showResult('ins_deploy_result', 'error', `❌ ${data.error}`);
+    }
+  } catch(e) { showResult('ins_deploy_result', 'error', '❌ Gagal deploy!'); }
+}
+
+async function claimInsurance() {
+  const body = {
+    contractId:     document.getElementById('ins_contract_id').value,
+    patientId:      document.getElementById('ins_patient').value,
+    diagnosis:      document.getElementById('ins_diagnosis').value,
+    diagnosisLevel: document.getElementById('ins_level').value,
+    walletAddress:  document.getElementById('ins_wallet').value,
+  };
+  if (!body.contractId || !body.patientId) {
+    return showResult('ins_claim_result', 'error', '❌ Contract dan Patient ID wajib diisi!');
+  }
+  try {
+    const res  = await fetch('/api/contract/insurance/claim', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (data.success) {
+      const html = data.claimed
+        ? `✅ <b>Klaim berhasil dicairkan!</b><br>
+           💰 Jumlah: <b>${data.amount} MED</b><br>
+           📊 Level: ${data.level}<br>
+           🔑 TxHash: <code>${data.txHash}</code>`
+        : `ℹ️ ${data.message}`;
+      showResult('ins_claim_result', 'success', html);
+      fetchContracts();
+      fetchLogs();
+    } else {
+      showResult('ins_claim_result', 'error', `❌ ${data.error}`);
+    }
+  } catch(e) { showResult('ins_claim_result', 'error', '❌ Gagal eksekusi!'); }
+}
+
+// ─────────────────────────────────────────────
+//  ACCESS CONTROL
+// ─────────────────────────────────────────────
+async function deployAccess() {
+  const ownerAddress = document.getElementById('ac_owner').value.trim();
+  if (!ownerAddress) return showResult('ac_deploy_result', 'error', '❌ Owner address wajib diisi!');
+  try {
+    const res  = await fetch('/api/contract/access/deploy', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ ownerAddress }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showResult('ac_deploy_result', 'success',
+        `✅ AccessControl contract deployed!<br><b>ID:</b> <code>${data.contract.id}</code>`);
+      fetchContracts();
+    }
+  } catch(e) { showResult('ac_deploy_result', 'error', '❌ Gagal deploy!'); }
+}
+
+async function grantAccess() {
+  const body = {
+    contractId:    document.getElementById('ac_contract_id').value,
+    patientId:     document.getElementById('ac_patient').value,
+    doctorAddress: document.getElementById('ac_doctor').value,
+    grantedBy:     document.getElementById('ac_by').value,
+  };
+  await callAccess('/api/contract/access/grant', body, 'ac_result');
+}
+
+async function revokeAccess() {
+  const body = {
+    contractId:    document.getElementById('ac_contract_id').value,
+    patientId:     document.getElementById('ac_patient').value,
+    doctorAddress: document.getElementById('ac_doctor').value,
+    revokedBy:     document.getElementById('ac_by').value,
+  };
+  await callAccess('/api/contract/access/revoke', body, 'ac_result');
+}
+
+async function checkAccess() {
+  const body = {
+    contractId:    document.getElementById('ac_contract_id').value,
+    patientId:     document.getElementById('ac_patient').value,
+    doctorAddress: document.getElementById('ac_doctor').value,
+  };
+  try {
+    const res  = await fetch('/api/contract/access/check', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    const badge = data.hasAccess
+      ? '<span class="access-badge access-yes">✅ MEMILIKI AKSES</span>'
+      : '<span class="access-badge access-no">❌ TIDAK MEMILIKI AKSES</span>';
+    showResult('ac_result', 'success',
+      `🔍 Hasil pengecekan:<br>${badge}<br>
+       Dokter: <code>${body.doctorAddress}</code><br>
+       Pasien: ${body.patientId}`);
+  } catch(e) { showResult('ac_result', 'error', '❌ Gagal!'); }
+}
+
+async function callAccess(url, body, resultId) {
+  try {
+    const res  = await fetch(url, {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showResult(resultId, 'success', `✅ ${data.message}`);
+      fetchLogs();
+    } else {
+      showResult(resultId, 'error', `❌ ${data.error}`);
+    }
+  } catch(e) { showResult(resultId, 'error', '❌ Gagal!'); }
+}
+
+// ─────────────────────────────────────────────
+//  PAYMENT
+// ─────────────────────────────────────────────
+async function deployPayment() {
+  const ownerAddress = document.getElementById('pay_owner').value.trim();
+  if (!ownerAddress) return showResult('pay_deploy_result', 'error', '❌ Owner address wajib diisi!');
+  try {
+    const res  = await fetch('/api/contract/payment/deploy', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ ownerAddress }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showResult('pay_deploy_result', 'success',
+        `✅ PaymentContract deployed!<br><b>ID:</b> <code>${data.contract.id}</code>`);
+      fetchContracts();
+    }
+  } catch(e) { showResult('pay_deploy_result', 'error', '❌ Gagal deploy!'); }
+}
+
+async function executePayment() {
+  const body = {
+    contractId:  document.getElementById('pay_contract_id').value,
+    fromAddress: document.getElementById('pay_from').value,
+    serviceType: document.getElementById('pay_service').value,
+    quantity:    parseInt(document.getElementById('pay_qty').value) || 1,
+  };
+  if (!body.contractId || !body.fromAddress) {
+    return showResult('pay_result', 'error', '❌ Contract ID dan wallet wajib diisi!');
+  }
+  try {
+    const res  = await fetch('/api/contract/payment/pay', {
+      method: 'POST', headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(body),
+    });
+    const data = await res.json();
+    if (data.success) {
+      showResult('pay_result', 'success',
+        `✅ <b>Pembayaran berhasil!</b><br>
+         🏥 Layanan: ${data.serviceType} (x${data.quantity})<br>
+         💰 Total: <b>${data.total} MED</b> (@${data.unitPrice} MED/unit)<br>
+         🔑 TxHash: <code>${data.txHash}</code>`);
+      fetchLogs();
+      fetchContracts();
+    } else {
+      showResult('pay_result', 'error', `❌ ${data.error}`);
+    }
+  } catch(e) { showResult('pay_result', 'error', '❌ Gagal proses pembayaran!'); }
+}
+
+// Init
+fetchContracts();
+</script>
+</body>
+</html>
